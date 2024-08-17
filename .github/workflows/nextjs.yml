@@ -36,6 +36,10 @@ jobs:
         with:
           node-version: "20"
           cache: pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          run_install: true
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
