@@ -3,6 +3,7 @@ import { style } from '@vanilla-extract/css';
 export const container = style({
   position: 'absolute',
   inset: 0,
-  border: '4rem solid #333',
+  margin: '4rem',
   lineHeight: 0,
+  backgroundColor: '#fff',
 });

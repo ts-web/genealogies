@@ -1,8 +1,8 @@
 'use client';
-import uniqueId from 'lodash/uniqueId';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { scaleLinear } from 'd3-scale';
+import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Axis } from 'react-d3-axis-ts';
-import { usePanZoom, normalizeWheelDelta } from 'use-d3-pan-zoom';
+import { normalizeWheelDelta, usePanZoom } from 'use-d3-pan-zoom';
 import useResizeObserver from 'use-resize-observer';
 import { useRev } from 'use-rev';
 
@@ -13,12 +13,11 @@ import { container } from './styles.css';
 const marginTop = 20;
 const marginRight = 10;
 const marginBottom = 30;
-const marginLeft = 40;
+const marginLeft = 10;
 
 export default function MainView () {
   const [chartElement, setChartElement] = useState<Element | null>();
-  const {ref, width: chartWidth = 100} = useResizeObserver<HTMLDivElement>();
-  const chartHeight = chartWidth;
+  const {ref, width: chartWidth = 100, height: chartHeight = 100} = useResizeObserver<HTMLDivElement>();
 
   // When the chartElement is resolved, prevent the default action of certain events:
   //   - touchstart — or else touch events on the chart will sometimes get intercepted by the browser for scrolling, page navigation ("swipe"), or full-page pixelated zooming.
@@ -49,6 +48,31 @@ export default function MainView () {
   };
 
   const [scaleRev, bumpRev] = useRev();
+  const [rendered, setRendered] = useState(false);
+
+  const xScale = useMemo(() => {
+    const _xScale = scaleLinear();
+    _xScale.domain([-2, 8]);
+    _xScale.range([marginLeft, 100 - marginRight]);
+    return _xScale;
+  }, []);
+  const yScale = useMemo(() => {
+    const _yScale = scaleLinear();
+    _yScale.domain([0, 1]).nice();
+    _yScale.range([100 - marginBottom, marginTop]);
+    return _yScale;
+  }, []);
+
+  useEffect(() => {
+    xScale.range([marginLeft, chartWidth - marginRight]);
+    bumpRev();
+    setRendered(true);
+  }, [chartWidth, xScale]);
+  useEffect(() => {
+    yScale.range([chartHeight - marginBottom, marginTop]);
+    bumpRev();
+    setRendered(true);
+  }, [chartHeight, yScale]);
 
   const {
     onPointerDown,
@@ -57,13 +81,6 @@ export default function MainView () {
   } = usePanZoom({
     xScale,
     yScale,
-    constrain: {
-      xMin: 0,
-      xMax: 1,
-      yMin: -Infinity,
-      yMax: Infinity,
-    },
-    minZoom: {xSpan: 0.2},
     lockYAxis: true,
     onUpdate: () => {
       bumpRev();
@@ -85,11 +102,10 @@ export default function MainView () {
   });
 
   // Create a clip-path with a unique ID.
-  const clipId = useMemo(() => uniqueId('clip'), []);
-  const xAxisClipId = useMemo(() => uniqueId('xAxisClip'), []);
+  const clipId = useId();
 
   return (
-    <div className={container}>
+    <div ref={ref} className={container}>
       <svg
         ref={setChartElement}
         width={chartWidth}
@@ -98,6 +114,7 @@ export default function MainView () {
         style={{
           overflow: 'hidden',
           userSelect: 'none',
+          visibility: rendered ? 'visible' : 'hidden',
         }}
         onPointerDown={(e) => {
           // Only listen to primary button events (no right-clicks, etc).
@@ -147,48 +164,18 @@ export default function MainView () {
             height={chartHeight - marginTop - marginBottom}
           />
         </clipPath>
-        <clipPath id={xAxisClipId}>
-          <rect
-            x={marginLeft}
-            y={chartHeight - marginBottom}
-            width={chartWidth - marginLeft - marginRight}
-            height={marginBottom}
-          />
-        </clipPath>
-        <g transform={`translate(${marginLeft}, 0)`}>
-          <Axis
-            orient='left'
-            scale={yScale}
-            scaleRev={scaleRev}
-          />
-        </g>
-        <g clipPath={`url(#${xAxisClipId})`}>
+        <g>
           <g transform={`translate(0, ${chartHeight - marginBottom})`}>
             <Axis
               orient='bottom'
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-              scale={xBandScaleForAxis as any}
+              scale={xScale}
               tickSizeOuter={0}
               scaleRev={scaleRev}
             />
           </g>
         </g>
         <g clipPath={`url(#${clipId})`}>
-          {data.map((d, i) => {
-            const bandX = xBandScale(d.letter);
-            if (bandX === undefined) return null;
-            const x1 = xScale(bandX);
-            const x2 = xScale(bandX + xBandScale.bandwidth());
-            return (
-              <rect key={i}
-                fill='steelblue'
-                x={x1}
-                y={yScale(d.frequency)}
-                height={yScale(0) - yScale(d.frequency)}
-                width={x2 - x1}
-              />
-            );
-          })}
+          {/* ... chart data ... */}
         </g>
       </svg>
     </div>

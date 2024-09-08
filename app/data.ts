@@ -46,7 +46,8 @@ export const gen_genealogy = {
     'gen_5_17',
   ],
 };
-// TODO plot the Masoretic Text number and the Septugint
+// TODO plot the Masoretic Text number and the Septugint.
+// TODO plot the Cain genealogy in Genesis 4.
 
 // Assumptions
 export const gen_5_12_interpretation = {
@@ -128,6 +129,7 @@ export const gen_begat_literal = {
 // TODO account for genesis numbers being rounded to the most significant digit.
 // TODO account for genesis numbers being base 12 (or something like that -- https://www.reddit.com/r/AskHistorians/comments/412z1w/biblical_historians_why_are_the_lifespans_of/).
 // TODO account for genesis numbers being 10x.
+// TODO account for genesis numbers being seasons.
 export const kenan_fathered_mahal = {
   id: 'kenan_fathered_mahal',
   assumption: 'that #p_kenan was the biological father of #p_mahal',
