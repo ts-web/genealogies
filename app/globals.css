@@ -16,6 +16,9 @@
   }
 }
 
+html {
+  height: 100%;
+}
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -23,7 +26,9 @@ body {
       transparent,
       rgb(var(--background-end-rgb))
     )
-    rgb(var(--background-start-rgb));
+    rgb(var(--background-start-rgb))
+  ;
+  height: 100%;
 }
 
 @layer utilities {

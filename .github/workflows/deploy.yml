@@ -7,7 +7,7 @@ name: Deploy Next.js site to Pages (pnpm)
 on:
   # Runs on pushes targeting the default branch
   push:
-    branches: [$default-branch]
+    branches: [main]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -41,6 +41,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
+          version: 9
           run_install: true
 
       - name: Setup Pages
