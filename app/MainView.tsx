@@ -6,7 +6,7 @@ import { normalizeWheelDelta, usePanZoom } from 'use-d3-pan-zoom';
 import useResizeObserver from 'use-resize-observer';
 import { useRev } from 'use-rev';
 
-import { container } from './styles.css';
+import styles from './styles.module.scss';
 
 
 // just chart stuff...
@@ -67,12 +67,12 @@ export default function MainView () {
     xScale.range([marginLeft, chartWidth - marginRight]);
     bumpRev();
     setRendered(true);
-  }, [chartWidth, xScale]);
+  }, [chartWidth, xScale, bumpRev]);
   useEffect(() => {
     yScale.range([chartHeight - marginBottom, marginTop]);
     bumpRev();
     setRendered(true);
-  }, [chartHeight, yScale]);
+  }, [chartHeight, yScale, bumpRev]);
 
   const {
     onPointerDown,
@@ -105,7 +105,7 @@ export default function MainView () {
   const clipId = useId();
 
   return (
-    <div ref={ref} className={container}>
+    <div ref={ref} className={styles.container}>
       <svg
         ref={setChartElement}
         width={chartWidth}
