@@ -1,13 +1,24 @@
 'use client';
+import Tooltip from '@mui/material/Tooltip';
 import { scaleLinear } from 'd3-scale';
 import { useEffect, useId, useMemo, useRef, useState } from 'react';
 import { Axis } from 'react-d3-axis-ts';
 import { normalizeWheelDelta, usePanZoom } from 'use-d3-pan-zoom';
 import useResizeObserver from 'use-resize-observer';
 import { useRev } from 'use-rev';
+import '@fontsource/roboto/300.css';
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 
 import styles from './styles.module.scss';
 
+
+export interface IPoint {
+  id: string;
+  label: string;
+  year: number;
+}
 
 // just chart stuff...
 const marginTop = 20;
@@ -15,7 +26,11 @@ const marginRight = 10;
 const marginBottom = 30;
 const marginLeft = 10;
 
-export default function MainView () {
+export default function MainView ({
+  points,
+}: {
+  points: IPoint[];
+}) {
   const [chartElement, setChartElement] = useState<Element | null>();
   const {ref, width: chartWidth = 100, height: chartHeight = 100} = useResizeObserver<HTMLDivElement>();
 
@@ -66,12 +81,13 @@ export default function MainView () {
   useEffect(() => {
     xScale.range([marginLeft, chartWidth - marginRight]);
     bumpRev();
-    setRendered(true);
+    setTimeout(() => {
+      setRendered(true);
+    });
   }, [chartWidth, xScale, bumpRev]);
   useEffect(() => {
     yScale.range([chartHeight - marginBottom, marginTop]);
     bumpRev();
-    setRendered(true);
   }, [chartHeight, yScale, bumpRev]);
 
   const {
@@ -175,9 +191,39 @@ export default function MainView () {
           </g>
         </g>
         <g clipPath={`url(#${clipId})`}>
-          {/* ... chart data ... */}
+          {points.map((point) => (
+              <Point
+                key={point.id}
+                x={xScale(point.year)}
+                y={chartHeight / 2}
+                label={point.label}
+              />
+          ))}
         </g>
       </svg>
     </div>
   );
 }
+
+
+const Point = ({
+  x,
+  y,
+  label,
+}: {
+  x: number;
+  y: number;
+  label: string;
+}) => {
+  return (
+    <Tooltip title={label}>
+      <g transform={`translate(${x}, ${y})`}>
+        <circle
+          cx={0}
+          cy={0}
+          r={5}
+        />
+      </g>
+    </Tooltip>
+  );
+};
